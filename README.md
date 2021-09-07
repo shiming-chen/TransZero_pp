@@ -58,7 +58,7 @@ Results of our released models using various evaluation protocols on three datas
 To intuitively show the effect our method for attribute localization, we provide more attention maps. 
 
 (For each row, image #1 is the original figure, image #2-#10 are the top-9
-attended attribute maps, image #11 is the global atttened map)
+attended attribute maps, image #11 is the global attened map)
 
 ![](figs/Acadian_Flycatcher_0008_795599.jpg)
 ![](figs/American_Goldfinch_0092_32910.jpg)
