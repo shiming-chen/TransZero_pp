@@ -1,5 +1,5 @@
 import torch
-from eval_func import evaluation
+from utils import evaluation, get_gpu_info
 from model import TransZero
 from dataset import UNIDataloader
 import argparse
@@ -29,4 +29,9 @@ if __name__=='__main__':
     config = parser.parse_args()
     with open(config.config, 'r') as f:
         config.__dict__ = json.load(f)
+    try:
+        config.device = get_gpu_info()
+    except:
+        config.device = 'cpu'
+    print(f'Device: {config.device}')
     run_test(config)

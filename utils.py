@@ -1,4 +1,13 @@
 import torch
+import os
+import numpy as np
+
+
+def get_gpu_info():
+    gpuinfolist = os.popen('nvidia-smi -q -d Memory |grep -A4 GPU|grep Free').readlines()
+    freemem = [int(gpuinfo.split()[2]) for gpuinfo in gpuinfolist]
+    gpuidx = len(freemem) - 1 - np.argmax(list(reversed(freemem)))
+    return f'cuda:{gpuidx}'
 
 
 def map_label(label, classes):
