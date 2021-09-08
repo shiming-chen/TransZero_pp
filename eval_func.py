@@ -94,13 +94,19 @@ def eval_zs_gzsl(config, dataloader, model, bias_seen=0, bias_unseen=0):
     unseenclasses = dataloader.unseenclasses
     batch_size = config.batch_size
     in_package = {'model': model, 'device': config.device, 'batch_size': batch_size}
-    with torch.no_grad():
-        acc_seen = val_gzsl(test_seen_loader, seenclasses,
-                            in_package, bias=bias_seen)
-        acc_novel, acc_zs = val_zs_gzsl(
-            test_unseen_loader, unseenclasses, in_package, bias=bias_unseen)
-    if (acc_seen+acc_novel) > 0:
-        H = (2*acc_seen*acc_novel) / (acc_seen+acc_novel)
-    else:
-        H = 0
-    return acc_seen, acc_novel, H, acc_zs
+    if config.zsl_task == 'CZSL':
+        with torch.no_grad():
+            _, acc_zs = val_zs_gzsl(
+                test_unseen_loader, unseenclasses, in_package, bias=bias_unseen)
+        return acc_zs
+    elif config.zsl_task == 'GZSL':
+        with torch.no_grad():
+            acc_seen = val_gzsl(test_seen_loader, seenclasses,
+                                in_package, bias=bias_seen)
+            acc_novel, _ = val_zs_gzsl(
+                test_unseen_loader, unseenclasses, in_package, bias=bias_unseen)
+        if (acc_seen+acc_novel) > 0:
+            H = (2*acc_seen*acc_novel) / (acc_seen+acc_novel)
+        else:
+            H = 0
+        return acc_seen, acc_novel, H
