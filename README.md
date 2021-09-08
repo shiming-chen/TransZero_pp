@@ -18,9 +18,12 @@ We provide trained models ([Google Drive](https://drive.google.com/drive/folders
 ```
 .
 ├── saved_model
-│   ├── CUB_GNDAN_weights.pth
-│   ├── SUN_GNDAN_weights.pth
-│   └── AWA2_GNDAN_weights.pth
+│   ├── TransZero_CUB_CZSL.pth
+│   ├── TransZero_CUB_GZSL.pth
+│   ├── TransZero_SUN_CZSL.pth
+│   ├── TransZero_SUN_GZSL.pth
+│   ├── TransZero_AWA2_CZSL.pth
+│   └── TransZero_AWA2_GZSL.pth
 ├── data
 │   ├── CUB/
 │   ├── SUN/
@@ -36,9 +39,12 @@ $ pip install -r requirements.txt
 ## Runing
 Runing following commands and testing **TransZero** on different dataset: 
 ```
-$ python test.py --config config/test_CUB.json      #CUB
-$ python test.py --config config/test_SUN.json      #SUN
-$ python test.py --config config/test_AWA2.json     #AWA2
+$ python test.py --config config/CUB_CZSL.json      # CUB_CZSL
+$ python test.py --config config/CUB_GZSL.json      # CUB_GZSL
+$ python test.py --config config/SUN_CZSL.json      # SUN_CZSL
+$ python test.py --config config/SUN_GZSL.json      # SUN_GZSL
+$ python test.py --config config/AWA2_CZSL.json     # AWA2_CZSL
+$ python test.py --config config/AWA2_GZSL.json     # AWA2_GZSL
 ```
 
 ## Results
@@ -47,7 +53,7 @@ Results of our released models using various evaluation protocols on three datas
 | Dataset | U | S | H | Acc |
 | :-----: | :-----: | :-----: | :-----: | :-----: |
 | CUB | 69.3 | 68.3 | 68.8 | 76.8 |
-| SUN | 50.1 | 34.3 | 40.8 | 65.6 |
+| SUN | 52.6 | 33.4 | 40.8 | 65.6 |
 | AWA2 | 61.3 | 82.3 | 70.2 | 70.1 |
 
 **Note**: All of above results are run on a server with an AMD Ryzen 7 5800X CPU and one Nvidia RTX A6000 GPU.
