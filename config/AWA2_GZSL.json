@@ -4,6 +4,7 @@
   "pkl_path": "./data/AWA2.pkl",
   "saved_model": "./saved_model/TransZero_AWA2_GZSL.pth",
   "zsl_task": "GZSL",
+  "device": "cuda:0",
   "num_workers": 16,
   "batch_size": 50,
   "num_attribute": 85,
