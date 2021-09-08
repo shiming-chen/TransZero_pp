@@ -37,14 +37,22 @@ The code implementation of **TransZero** mainly based on [PyTorch](https://pytor
 $ pip install -r requirements.txt
 ```
 ## Runing
-Runing following commands and testing **TransZero** on different dataset: 
+Runing following commands and testing **TransZero** on different dataset:
+
+CUB Dataset: 
 ```
-$ python test.py --config config/CUB_CZSL.json      # CUB_CZSL
-$ python test.py --config config/CUB_GZSL.json      # CUB_GZSL
-$ python test.py --config config/SUN_CZSL.json      # SUN_CZSL
-$ python test.py --config config/SUN_GZSL.json      # SUN_GZSL
-$ python test.py --config config/AWA2_CZSL.json     # AWA2_CZSL
-$ python test.py --config config/AWA2_GZSL.json     # AWA2_GZSL
+$ python test.py --config config/CUB_CZSL.json      # CZSL Setting
+$ python test.py --config config/CUB_GZSL.json      # GZSL Setting
+```
+SUN Dataset:
+```
+$ python test.py --config config/SUN_CZSL.json      # CZSL Setting
+$ python test.py --config config/SUN_GZSL.json      # GZSL Setting
+```
+AWA2 Dataset: 
+```
+$ python test.py --config config/AWA2_CZSL.json     # CZSL Setting
+$ python test.py --config config/AWA2_GZSL.json     # GZSL Setting
 ```
 
 ## Results
