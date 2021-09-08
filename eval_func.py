@@ -110,3 +110,14 @@ def eval_zs_gzsl(config, dataloader, model, bias_seen=0, bias_unseen=0):
         else:
             H = 0
         return acc_seen, acc_novel, H
+
+
+def evaluation(config, dataloader, model):
+    if config.zsl_task == 'CZSL':
+        acc_zs = eval_zs_gzsl(config, dataloader, model)
+        print('Results: Acc_ZSL={:.3f}'.format(acc_zs))
+    elif config.zsl_task == 'GZSL':
+        acc_seen, acc_novel, H = eval_zs_gzsl(config, dataloader, model)
+        print('Results: Acc_Unseen={:.3f}, Acc_Seen={:.3f}, H={:.3f}'.format(
+            acc_novel, acc_seen, H))
+    return
