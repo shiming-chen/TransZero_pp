@@ -74,6 +74,7 @@ To intuitively show the effect our method for attribute localization, we provide
 (For each row, image #1 is the original figure, image #2-#10 are the top-9
 attended attribute maps, image #11 is the global attened map)
 
+
 ![](figs/Acadian_Flycatcher_0008_795599.jpg)
 ![](figs/American_Goldfinch_0092_32910.jpg)
 ![](figs/Canada_Warbler_0117_162394.jpg)
