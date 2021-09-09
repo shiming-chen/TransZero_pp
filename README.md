@@ -1,11 +1,12 @@
 # TransZero
 
 
-Anonymous codes for the paper "*TransZero: Attribute-guided Transformer for Zero-Shot Learning*" submitted to AAAI 2022. Note that this repository includes the following materials for testing and checking our results reported in our paper:
+This is anonymous project website of the paper "*TransZero: Attribute-guided Transformer for Zero-Shot Learning*" submitted to AAAI 2022. Note that this repository includes the following materials for testing and checking our results reported in our paper:
 
-1. the trained model
-2. test scripts
-3. more visualization of attention maps.  
+1. The trained model
+2. The test scripts
+3. The t-SNE visualization of visual features on SUN and AWA2.  
+4. More visualization of attention maps. 
 
 **Once our paper is accepted, we will release all codes of this work**.
 
