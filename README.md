@@ -69,18 +69,46 @@ Results of our released models using various evaluation protocols on three datas
 <!-- ## References -->
 
 # Visualization Results
-To intuitively show the effect our method for attribute localization, we provide more attention maps. 
+## t-SNE Visualizations
+Moreover, we present the t-SNE visualization of visual features for seen classes and unseen classes on three datasets, learned by the CNN backbone, TransZero encoder w/o FA, TransZero encoder, and TransZero decoder.
+### CUB Dataset: 
+Seen Class: 
+![](figs/tsne_cub_seen.png)
+Unseen Class: 
+![](figs/tsne_cub_unseen.png)
 
-(For each row, image #1 is the original figure, image #2-#10 are the top-9
-attended attribute maps, image #11 is the global attened map)
+### SUN Dataset:
+Seen Class:  
+![](figs/tsne_sun_seen.png)
+Unseen Class: 
+![](figs/tsne_sun_unseen.png)
+
+### AWA2 Dataset: 
+Seen Class: 
+![](figs/tsne_awa2_seen.png)
+Unseen Class: 
+![](figs/tsne_awa2_unseen.png)
+
+## Attention Maps
+
+To intuitively show the effect our method for attribute localization, we provide more attention maps. For each row, image #1 is the original figure, image #2-#10 are the top-9
+attended attribute maps, image #11 is the global attened map.
 
 
 ![](figs/Acadian_Flycatcher_0008_795599.jpg)
 ![](figs/American_Goldfinch_0092_32910.jpg)
 ![](figs/Canada_Warbler_0117_162394.jpg)
 ![](figs/Carolina_Wren_0006_186742.jpg)
+![](figs/Elegant_Tern_0085_151091.jpg)
+![](figs/European_Goldfinch_0025_794647.jpg)
+![](figs/Florida_Jay_0008_64482.jpg)
+![](figs/Fox_Sparrow_0025_114555.jpg)
+![](figs/Grasshopper_Sparrow_0053_115991.jpg)
+![](figs/Grasshopper_Sparrow_0107_116286.jpg)
+![](figs/Gray_Crowned_Rosy_Finch_0036_797287.jpg)
 ![](figs/Vesper_Sparrow_0090_125690.jpg)
 ![](figs/Western_Gull_0058_53882.jpg)
 ![](figs/White_Throated_Sparrow_0128_128956.jpg)
 ![](figs/Winter_Wren_0118_189805.jpg)
 ![](figs/Yellow_Breasted_Chat_0044_22106.jpg)
+
