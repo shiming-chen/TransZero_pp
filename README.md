@@ -1,11 +1,12 @@
 # TransZero
 
 
-Anonymous codes for the paper "*TransZero: Attribute-guided Transformer for Zero-Shot Learning*" submitted to AAAI 2022. Note that this repository includes the following materials for testing and checking our results reported in our paper:
+This is anonymous project website of the paper "*TransZero: Attribute-guided Transformer for Zero-Shot Learning*" submitted to AAAI 2022. This website includes the following materials for testing and checking our results reported in our paper:
 
-1. the trained model
-2. test scripts
-3. more visualization of attention maps.  
+1. The trained model
+2. The test scripts
+3. The t-SNE visualization of visual features on SUN and AWA2.  
+4. More visualization of attention maps. 
 
 **Once our paper is accepted, we will release all codes of this work**.
 
@@ -70,7 +71,7 @@ Results of our released models using various evaluation protocols on three datas
 
 # Visualization Results
 ## t-SNE Visualizations
-Moreover, we present the t-SNE visualization of visual features for seen classes and unseen classes on three datasets, learned by the CNN backbone, TransZero encoder w/o FA, TransZero encoder, and TransZero decoder.
+The t-SNE visualization of visual features for seen classes and unseen classes on three datasets, learned by the **CNN backbone**, **TransZero encoder w/o FA**, **TransZero encoder**, and **TransZero decoder**.
 ### CUB Dataset: 
 Seen Class: 
 ![](figs/tsne_cub_seen.png)
@@ -91,9 +92,8 @@ Unseen Class:
 
 ## Attention Maps
 
-To intuitively show the effect our method for attribute localization, we provide more attention maps. For each row, image #1 is the original figure, image #2-#10 are the top-9
-attended attribute maps, image #11 is the global attened map.
-
+To intuitively show the effect our method for attribute localization, we provide more attention maps. For each row, image #1 is the original figure, image #2-#11 are the top-10
+attended attribute maps.
 
 ![](figs/Acadian_Flycatcher_0008_795599.jpg)
 ![](figs/American_Goldfinch_0092_32910.jpg)
