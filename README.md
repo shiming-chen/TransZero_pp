@@ -71,7 +71,7 @@ Results of our released models using various evaluation protocols on three datas
 
 # Visualization Results
 ## t-SNE Visualizations
-The t-SNE visualization of visual features for seen classes and unseen classes on three datasets, learned by the **CNN backbone**, **TransZero encoder w/o FA**, **TransZero encoder**, and **TransZero decoder**.
+The t-SNE visualization of visual features for seen classes and unseen classes on three datasets, learned by the **CNN Backbone**, **TransZero Encoder w/o FA**, **TransZero Encoder**, and **TransZero Decoder**.
 ### CUB Dataset: 
 Seen Class: 
 ![](figs/tsne_cub_seen.png)
@@ -92,13 +92,13 @@ Unseen Class:
 
 ## Attention Maps
 
-To intuitively show the effect our method for attribute localization, we provide more attention maps. For each row, image #1 is the original figure, image #2-#11 are the top-10
-attended attribute maps.
+To intuitively show the effect our method for attribute localization, we provide more attention maps.  
+For each row, **Image 1** is the original figure, **Image 2-11** are the top-10
+attended attribute maps
 
 ![](figs/Acadian_Flycatcher_0008_795599.jpg)
 ![](figs/American_Goldfinch_0092_32910.jpg)
 ![](figs/Canada_Warbler_0117_162394.jpg)
-![](figs/Carolina_Wren_0006_186742.jpg)
 ![](figs/Elegant_Tern_0085_151091.jpg)
 ![](figs/European_Goldfinch_0025_794647.jpg)
 ![](figs/Florida_Jay_0008_64482.jpg)
