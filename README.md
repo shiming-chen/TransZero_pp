@@ -1,11 +1,11 @@
 # TransZero
 
 
-This is anonymous project website of the paper "*TransZero: Attribute-guided Transformer for Zero-Shot Learning*" submitted to AAAI 2022. This website includes the following materials for testing and checking our results reported in our paper:
+This is anonymous project website of the paper "***TransZero: Attribute-guided Transformer for Zero-Shot Learning***" submitted to AAAI 2022. This website includes the following materials for testing and checking our results reported in our paper:
 
 1. The trained model
 2. The test scripts
-3. The t-SNE visualization of visual features on SUN and AWA2.  
+3. The t-SNE visualization of visual features on **CUB**, **SUN** and **AWA2**.  
 4. More visualization of attention maps. 
 
 **Once our paper is accepted, we will release all codes of this work**.
@@ -59,13 +59,13 @@ $ python test.py --config config/AWA2_GZSL.json     # GZSL Setting
 ## Results
 Results of our released models using various evaluation protocols on three datasets, both in the conventional ZSL (CZSL) and generalized ZSL (GZSL) settings.
 
-| Dataset | U | S | H | Acc |
+| Dataset | Acc(CZSL) | U(GZSL) | S(GZSL) | H(GZSL) |
 | :-----: | :-----: | :-----: | :-----: | :-----: |
-| CUB | 69.3 | 68.3 | 68.8 | 76.8 |
-| SUN | 52.6 | 33.4 | 40.8 | 65.6 |
-| AWA2 | 61.3 | 82.3 | 70.2 | 70.1 |
+| CUB | 76.8 | 69.3 | 68.3 | 68.8 |
+| SUN | 65.6 | 52.6 | 33.4 | 40.8 |
+| AWA2 | 70.1 | 61.3 | 82.3 | 70.2 |
 
-**Note**: All of above results are run on a server with an AMD Ryzen 7 5800X CPU and one Nvidia RTX A6000 GPU.
+**Note**: All of above results are run on a server with an AMD Ryzen 7 5800X CPU and a NVIDIA RTX A6000 GPU.
 
 <!-- ## References -->
 
