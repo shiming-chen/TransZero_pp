@@ -67,7 +67,7 @@ If this work is helpful for you, please cite our paper.
 ```
 @InProceedings{Chen2021TransZero,
     author    = {Chen, Shiming and Hong, Ziming and Liu, Yang and Xie, Guo-Sen and Sun, Baigui and Li, Hao and Peng, Qinmu and Lu, Ke and You, Xinge},
-    title     = {	TransZero: Attribute-guided Transformer for Zero-Shot Learning},
+    title     = {TransZero: Attribute-guided Transformer for Zero-Shot Learning},
     booktitle = {Proceedings of the Thirty-Sixth AAAI Conference on Artificial Intelligence (AAAI)},
     year      = {2022}
 }
