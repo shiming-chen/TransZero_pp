@@ -6,7 +6,7 @@ This repository contains the testing code for the paper  "***TransZero: Attribut
 
 ![](figs/pipeline.png)
 
-# Usage of Testing Codes
+
 ## Preparing Dataset and Model
 
 We provide trained models ([Google Drive](https://drive.google.com/drive/folders/1WK9pm2eX2Rl4rWqXqe_EZiAM8wWB8yqG?usp=sharing)) on three different datasets: [CUB](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html), [SUN](http://cs.brown.edu/~gmpatter/sunattributes.html), [AWA2](http://cvml.ist.ac.at/AwA2/) in the CZSL/GZSL setting. You can download model files as well as corresponding datasets, and organize them as follows: 
