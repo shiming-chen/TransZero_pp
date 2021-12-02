@@ -61,6 +61,19 @@ Results of our released models using various evaluation protocols on three datas
 
 **Note**: All of above results are run on a server with an AMD Ryzen 7 5800X CPU and a NVIDIA RTX A6000 GPU.
 
+## Citation
+If this work is helpful for you, please cite our paper.
+
+```
+@InProceedings{Chen2021TransZero,
+    author    = {Chen, Shiming and Hong, Ziming and Liu, Yang and Xie, Guo-Sen and Sun, Baigui and Li, Hao and Peng, Qinmu and Lu, Ke and You, Xinge},
+    title     = {	TransZero: Attribute-guided Transformer for Zero-Shot Learning},
+    booktitle = {Proceedings of the Thirty-Sixth AAAI Conference on Artificial Intelligence (AAAI)},
+    year      = {2022}
+}
+```
+
+
 <!-- ## References -->
 ## Contact
 If you have any questions about codes, please don't hesitate to contact us by gchenshiming@gmail.com or hoongzm@gmail.com.
