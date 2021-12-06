@@ -1,4 +1,4 @@
-# TransZero
+# TransZero [[arXiv]](https://arxiv.org/pdf/2112.01683.pdf)
 
 
 This repository contains the testing code for the paper  "***TransZero: Attribute-guided Transformer for Zero-Shot Learning***" accepted to AAAI 2022. 
