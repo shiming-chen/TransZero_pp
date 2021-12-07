@@ -73,7 +73,10 @@ If this work is helpful for you, please cite our paper.
 }
 ```
 
+## References
+Parts of our codes based on:
+* [hbdat/cvpr20_DAZLE](https://github.com/hbdat/cvpr20_DAZLE)
+* [zhangxuying1004/RSTNet](https://github.com/zhangxuying1004/RSTNet)
 
-<!-- ## References -->
 ## Contact
 If you have any questions about codes, please don't hesitate to contact us by gchenshiming@gmail.com or hoongzm@gmail.com.
