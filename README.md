@@ -1,10 +1,9 @@
 # TransZero [[arXiv]](https://arxiv.org/pdf/2112.01683.pdf)
 
 
-This repository contains the testing code for the paper  "***TransZero: Attribute-guided Transformer for Zero-Shot Learning***" accepted to AAAI 2022. 
+This repository contains the testing code for the paper  "***TransZero++: Cross Attribute-guided Transformer for Zero-Shot Learning***" submitted to TPAMI. 
 **We will release all codes of this work later**.
 
-![](figs/pipeline.png)
 
 
 ## Preparing Dataset and Model
@@ -55,23 +54,12 @@ Results of our released models using various evaluation protocols on three datas
 
 | Dataset | Acc(CZSL) | U(GZSL) | S(GZSL) | H(GZSL) |
 | :-----: | :-----: | :-----: | :-----: | :-----: |
-| CUB | 76.8 | 69.3 | 68.3 | 68.8 |
-| SUN | 65.6 | 52.6 | 33.4 | 40.8 |
-| AWA2 | 70.1 | 61.3 | 82.3 | 70.2 |
+| CUB | 78.6 | 67.5 | 73.6 | 70.3 |
+| SUN | 67.6 | 48.2 | 37.6 | 42.3 |
+| AWA2 | 72.6 | 64.5 | 82.7 | 72.5 |
 
 **Note**: All of above results are run on a server with an AMD Ryzen 7 5800X CPU and a NVIDIA RTX A6000 GPU.
 
-## Citation
-If this work is helpful for you, please cite our paper.
-
-```
-@InProceedings{Chen2021TransZero,
-    author    = {Chen, Shiming and Hong, Ziming and Liu, Yang and Xie, Guo-Sen and Sun, Baigui and Li, Hao and Peng, Qinmu and Lu, Ke and You, Xinge},
-    title     = {TransZero: Attribute-guided Transformer for Zero-Shot Learning},
-    booktitle = {Proceedings of the Thirty-Sixth AAAI Conference on Artificial Intelligence (AAAI)},
-    year      = {2022}
-}
-```
 
 ## References
 Parts of our codes based on:
