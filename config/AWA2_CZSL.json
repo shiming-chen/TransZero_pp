@@ -21,5 +21,5 @@
   "tf_common_dim": 300,
   "tf_dim_feedforward": 512,
   "tf_dropout": 0.5,
-  "weight_a2v": 0.5
+  "weight_s2v": 0.5
 }
