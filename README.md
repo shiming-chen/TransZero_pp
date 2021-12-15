@@ -1,4 +1,4 @@
-# TransZero [[arXiv]](https://arxiv.org/pdf/2112.01683.pdf)[[Project Website]](https://shiming-chen.github.io/TransZero-pp/TransZero-pp.html)
+# TransZero++ [[arXiv]](https://arxiv.org/pdf/2112.01683.pdf)[[Project Website]](https://shiming-chen.github.io/TransZero-pp/TransZero-pp.html)
 
 
 This repository contains the testing code for the paper  "***TransZero++: Cross Attribute-guided Transformer for Zero-Shot Learning***" submitted to TPAMI. 
