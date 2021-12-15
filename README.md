@@ -8,7 +8,7 @@ This repository contains the testing code for the paper  "***TransZero++: Cross 
 
 ## Preparing Dataset and Model
 
-We provide trained models ([Google Drive](https://drive.google.com/drive/folders/1WK9pm2eX2Rl4rWqXqe_EZiAM8wWB8yqG?usp=sharing)) on three different datasets: [CUB](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html), [SUN](http://cs.brown.edu/~gmpatter/sunattributes.html), [AWA2](http://cvml.ist.ac.at/AwA2/) in the CZSL/GZSL setting. You can download model files as well as corresponding datasets, and organize them as follows: 
+We provide trained models ([Google Drive](https://drive.google.com/drive/folders/1rNHCglaSD_Q5se1rs5qIh6QNtMDCZokc?usp=sharing)) on three different datasets: [CUB](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html), [SUN](http://cs.brown.edu/~gmpatter/sunattributes.html), [AWA2](http://cvml.ist.ac.at/AwA2/) in the CZSL/GZSL setting. You can download model files as well as corresponding datasets, and organize them as follows: 
 ```
 .
 ├── saved_model
@@ -54,9 +54,9 @@ Results of our released models using various evaluation protocols on three datas
 
 | Dataset | Acc(CZSL) | U(GZSL) | S(GZSL) | H(GZSL) |
 | :-----: | :-----: | :-----: | :-----: | :-----: |
-| CUB | 78.6 | 67.5 | 73.6 | 70.3 |
-| SUN | 67.6 | 48.2 | 37.6 | 42.3 |
-| AWA2 | 72.6 | 64.5 | 82.7 | 72.5 |
+| CUB | 78.3 | 67.5 | 73.6 | 70.4 |
+| SUN | 67.6 | 48.6 | 37.8 | 42.5 |
+| AWA2 | 72.6 | 64.6 | 82.7 | 72.5 |
 
 **Note**: All of above results are run on a server with an AMD Ryzen 7 5800X CPU and a NVIDIA RTX A6000 GPU.
 
