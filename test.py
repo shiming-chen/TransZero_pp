@@ -1,6 +1,6 @@
 import torch
 from utils import evaluation
-from model import TransZero
+from model import TransZeroPP
 from dataset import UNIDataloader
 import argparse
 import json
@@ -11,7 +11,7 @@ def run_test(config):
     # dataset
     dataloader = UNIDataloader(config)
     # model
-    model = TransZero(config)
+    model = TransZeroPP(config)
     # load parameters
     model_dict = model.state_dict()
     saved_dict = torch.load(config.saved_model)

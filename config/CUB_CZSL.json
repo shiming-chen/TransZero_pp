@@ -2,7 +2,7 @@
   "dataset": "CUB",
   "dataset_path": "./data/CUB",
   "pkl_path": "./data/CUB.pkl",
-  "saved_model": "./saved_model/TransZero_CUB_CZSL.pth",
+  "saved_model": "./saved_model/TransZeroPP_CUB_CZSL.pth",
   "zsl_task": "CZSL",
   "device": "cuda:0",
   "num_workers": 16,
@@ -20,5 +20,6 @@
   "tf_heads": 1,
   "tf_common_dim": 300,
   "tf_dim_feedforward": 512,
-  "tf_dropout": 0.4
+  "tf_dropout": 0.4,
+  "weight_s2v": 0.9
 }

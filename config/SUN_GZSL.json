@@ -2,7 +2,7 @@
   "dataset": "SUN",
   "dataset_path": "./data/SUN",
   "pkl_path": "./data/SUN.pkl",
-  "saved_model": "./saved_model/TransZero_SUN_GZSL.pth",
+  "saved_model": "./saved_model/TransZeroPP_SUN_GZSL.pth",
   "zsl_task": "GZSL",
   "device": "cuda:0",
   "num_workers": 16,
@@ -20,5 +20,6 @@
   "tf_heads": 1,
   "tf_common_dim": 128,
   "tf_dim_feedforward": 2048,
-  "tf_dropout": 0.3
+  "tf_dropout": 0.3,
+  "weight_s2v": 0.6
 }

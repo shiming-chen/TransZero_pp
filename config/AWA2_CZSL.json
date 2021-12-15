@@ -2,7 +2,7 @@
   "dataset": "AWA2",
   "dataset_path": "./data/AWA2",
   "pkl_path": "./data/AWA2.pkl",
-  "saved_model": "./saved_model/TransZero_AWA2_CZSL.pth",
+  "saved_model": "./saved_model/TransZeroPP_AWA2_CZSL.pth",
   "zsl_task": "CZSL",
   "device": "cuda:0",
   "num_workers": 16,
@@ -18,7 +18,8 @@
   "tf_ec_layer": 1,
   "tf_dc_layer": 1,
   "tf_heads": 1,
-  "tf_common_dim": 512,
+  "tf_common_dim": 300,
   "tf_dim_feedforward": 512,
-  "tf_dropout": 0.5
+  "tf_dropout": 0.5,
+  "weight_a2v": 0.5
 }

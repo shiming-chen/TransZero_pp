@@ -5,25 +5,20 @@ import numpy as np
 import torchvision.models as models
 
 
-class TransZero(nn.Module):
+class TransZeroPP(nn.Module):
     def __init__(self, config):
-        super(TransZero, self).__init__()
+        super(TransZeroPP, self).__init__()
         self.config = config
         self.dim_f = config.dim_f
         self.dim_v = config.dim_v
         self.nclass = config.num_class
 
-        self.att = nn.Parameter(torch.empty(
-            self.nclass, config.num_attribute), requires_grad=False)
-        self.bias = nn.Parameter(torch.tensor(1), requires_grad=False)
-        self.mask_bias = nn.Parameter(torch.empty(
-            1, self.nclass), requires_grad=False)
-        self.V = nn.Parameter(torch.empty(
-            config.num_attribute, self.dim_v), requires_grad=True)
-        self.W_1 = nn.Parameter(torch.empty(
-            self.dim_v, config.tf_common_dim), requires_grad=True)
+        # bakcbone
+        resnet101 = models.resnet101(pretrained=True)
+        self.resnet101 = nn.Sequential(*list(resnet101.children())[:-2])
 
-        self.transformer = Transformer(
+        # AVT
+        self.transformer_s2v = TransformerPP(
             ec_layer=config.tf_ec_layer,
             dc_layer=config.tf_dc_layer,
             dim_com=config.tf_common_dim,
@@ -31,15 +26,41 @@ class TransZero(nn.Module):
             dropout=config.tf_dropout,
             SAtt=config.tf_SAtt,
             heads=config.tf_heads)
-
-        # bakcbone
-        resnet101 = models.resnet101(pretrained=True)
-        self.resnet101 = nn.Sequential(*list(resnet101.children())[:-2])
+        # VAT
+        self.transformer_v2s = TransformerPP(
+            ec_layer=config.tf_ec_layer,
+            dc_layer=config.tf_dc_layer,
+            dim_com=config.tf_common_dim,
+            dim_feedforward=config.tf_dim_feedforward,
+            dropout=config.tf_dropout,
+            SAtt=config.tf_SAtt,
+            heads=config.tf_heads)
+        
+        self.V = nn.Parameter(torch.empty(
+            config.num_attribute, self.dim_v), requires_grad=True)
+        self.att = nn.Parameter(torch.empty(
+            self.nclass, config.num_attribute), requires_grad=False)
+        self.bias = nn.Parameter(torch.tensor(1), requires_grad=False)
+        self.mask_bias = nn.Parameter(torch.empty(
+            1, self.nclass), requires_grad=False)
+        self.W_1_s2v = nn.Parameter(torch.empty(
+            self.dim_v, config.tf_common_dim), requires_grad=True)
+        self.W_3_s2v = nn.Parameter(torch.empty(
+            self.dim_v, config.tf_common_dim), requires_grad=True)
+        self.W_1_v2s = nn.Parameter(torch.empty(
+            config.tf_common_dim, config.tf_common_dim), requires_grad=True)
+        self.W_3_v2s = nn.Parameter(torch.empty(
+            self.dim_f, config.tf_common_dim), requires_grad=True)
+        self.W_4_v2s = nn.Parameter(torch.empty(
+            config.tf_common_dim, config.tf_common_dim), requires_grad=True)
 
     def forward(self, imgs):
         Fs = self.resnet101(imgs)
-        dazle_embed = self.forward_feature_transformer(Fs)
-        package = {'embed': self.forward_attribute(dazle_embed)}
+        embed_s2v, embed_v2s = self.forward_feature_transformer(Fs)
+        package = {'embed_s2v': self.forward_attribute(embed_s2v),
+                   'embed_v2s': self.forward_attribute(embed_v2s)}
+        package['embed'] = self.config.weight_s2v * package['embed_s2v'] + \
+            (1 - self.config.weight_s2v) * package['embed_v2s']
         return package
 
     def forward_attribute(self, embed):
@@ -53,11 +74,27 @@ class TransZero(nn.Module):
             shape = Fs.shape
             Fs = Fs.reshape(shape[0], shape[1], shape[2] * shape[3])
         Fs = F.normalize(Fs, dim=1)
+        Fs_pmt = Fs.permute(0, 2, 1)
         V_n = F.normalize(self.V) if self.config.normalize_V else self.V
-        Trans_out = self.transformer(Fs, V_n)
-        embed = torch.einsum('iv,vf,bif->bi', V_n, self.W_1, Trans_out)
-        return embed
+        V_n_batch = V_n.unsqueeze(0).repeat(shape[0], 1, 1)
+        # semantic-2-visual
+        memory_s2v, _, emb_att_s2v = self.transformer_s2v.forward_encoder(
+                Fs_pmt, V_n_batch)
+        F_p_s2v = self.transformer_s2v.forward_decoder(
+            memory_s2v, emb_att_s2v, type='s2v')
+        S_p_s2v = torch.einsum('biv,vc,bic->bi', V_n_batch, self.W_1_s2v, F_p_s2v)
+        embed_s2v = S_p_s2v
+        # visual-2-semantic
+        memory_v2s, emb_vis_v2s, emb_att_v2s = self.transformer_v2s.forward_encoder(
+            Fs_pmt, V_n_batch)
+        F_p_v2s = self.transformer_v2s.forward_decoder(
+            memory_v2s, emb_att_v2s, type='v2s')
+        S_p_v2s = torch.einsum('rbf,fc,brc->br', memory_v2s, self.W_1_v2s, F_p_v2s)
+        E_v2s = torch.einsum('brc,cc,bic->bir', emb_vis_v2s, self.W_4_v2s, emb_att_v2s)
+        embed_v2s = torch.einsum('bir,br->bi', E_v2s, S_p_v2s)
 
+        return embed_s2v, embed_v2s
+        
 
 class Transformer(nn.Module):
     def __init__(self, ec_layer=1, dc_layer=1, dim_com=300,
@@ -89,6 +126,34 @@ class Transformer(nn.Module):
         h_attr_batch = h_attr.unsqueeze(0).repeat(f_cv.shape[0], 1, 1)
         memory = self.transformer_encoder(h_cv).permute(1, 0, 2)
         out = self.transformer_decoder(h_attr_batch.permute(1, 0, 2), memory)
+        return out.permute(1, 0, 2)
+
+
+class TransformerPP(Transformer):
+    def __init__(self, ec_layer=1, dc_layer=1, dim_com=300,
+                 dim_feedforward=2048, dropout=0.1, heads=1,
+                 in_dim_cv=2048, in_dim_attr=300, SAtt=True):
+
+        super(TransformerPP, self).__init__(
+            ec_layer, dc_layer, dim_com, dim_feedforward, dropout,
+            heads, in_dim_cv, in_dim_attr, SAtt)
+
+    def forward_encoder(self, f_cv, f_attr, pre_embed=True, is_enc=True):
+        if pre_embed:
+            h_cv = self.embed_cv(f_cv)
+            h_attr = self.embed_attr(f_attr)
+        else:
+            h_cv = f_cv
+            h_attr = f_attr
+        if is_enc:
+            memory = self.transformer_encoder(h_cv).permute(1, 0, 2)
+        return memory, h_cv, h_attr
+
+    def forward_decoder(self, memory, h_attr, type='s2v'):
+        if type == 's2v':
+            out = self.transformer_decoder(h_attr.permute(1, 0, 2), memory)
+        elif type == 'v2s':
+            out = self.transformer_decoder(memory, h_attr.permute(1, 0, 2))
         return out.permute(1, 0, 2)
 
 
