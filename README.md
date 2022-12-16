@@ -1,7 +1,7 @@
 # TransZero++ 
 
 
-This repository contains the testing code for the paper  "***TransZero++: Cross Attribute-guided Transformer for Zero-Shot Learning***" submitted to TPAMI. 
+This repository contains the testing code for the paper  "***TransZero++: Cross Attribute-guided Transformer for Zero-Shot Learning***" accepted to TPAMI. 
 **We will release all codes of this work later**.
 
 
