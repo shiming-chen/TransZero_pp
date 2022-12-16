@@ -60,6 +60,17 @@ Results of our released models using various evaluation protocols on three datas
 
 **Note**: All of above results are run on a server with an AMD Ryzen 7 5800X CPU and a NVIDIA RTX A6000 GPU.
 
+## Citation
+If this work is helpful for you, please cite our paper.
+
+```
+@article{Chen2022TransZeropp,
+    author    = {Chen, Shiming and Hong, Ziming and Hou, Wenjin and Xie, Guo-Sen and Song, Yibing and Zhao, Jian and You, Xinge and Yan, Shuicheng and Shao, Ling},
+    title     = {TransZero++: Cross Attribute-guided Transformer for Zero-Shot Learning},
+    booktitle = {IEEE Transactions on Pattern Analysis and Machine Intelligence},
+    year      = {2022}
+}
+```
 
 ## References
 Parts of our codes based on:
