@@ -2,6 +2,8 @@
 
 This repository contains the training and testing code for the paper "***TransZero++: Cross Attribute-guided Transformer for Zero-Shot Learning***" accepted to TPAMI.
 
+![](figs/tzpp.png)
+
 ## Running Environment
 The implementation of **TransZero++** is mainly based on Python 3.8.8 and [PyTorch](https://pytorch.org/) 1.8.0. To install all required dependencies:
 ```
@@ -49,7 +51,7 @@ $ python train_awa2.py  # AWA2
 
 ## Results
 
-We also provide trained models ([Google Drive](https://drive.google.com/drive/folders/1rNHCglaSD_Q5se1rs5qIh6QNtMDCZokc?usp=sharing)) on CUB/SUN/AWA2. You can download these `.pth` files and validate the results in our paper. Please refer to the [here](https://github.com/shiming-chen/TransZero/tree/test) for testing codes and usage.
+We also provide trained models ([Google Drive](https://drive.google.com/drive/folders/1rNHCglaSD_Q5se1rs5qIh6QNtMDCZokc?usp=sharing)) on CUB/SUN/AWA2. You can download these `.pth` files and validate the results in our paper. Please refer to the [here](https://github.com/shiming-chen/TransZero_pp/tree/f8251f2991c31775d6eb0367986321a681429713) for testing codes and usage.
 Following table shows the results of our released models using various evaluation protocols on three datasets, both in the CZSL and GZSL settings:
 
 | Dataset | Acc(CZSL) | U(GZSL) | S(GZSL) | H(GZSL) |
