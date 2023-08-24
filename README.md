@@ -1,55 +1,56 @@
 # TransZero++ 
 
+This repository contains the training and testing code for the paper "***TransZero++: Cross Attribute-guided Transformer for Zero-Shot Learning***" accepted to TPAMI.
 
-This repository contains the testing code for the paper  "***TransZero++: Cross Attribute-guided Transformer for Zero-Shot Learning***" accepted to TPAMI.
-
-
-
-## Preparing Dataset and Model
-
-We provide trained models ([Google Drive](https://drive.google.com/drive/folders/1rNHCglaSD_Q5se1rs5qIh6QNtMDCZokc?usp=sharing)) on three different datasets: [CUB](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html), [SUN](http://cs.brown.edu/~gmpatter/sunattributes.html), [AWA2](http://cvml.ist.ac.at/AwA2/) in the CZSL/GZSL setting. You can download model files as well as corresponding datasets, and organize them as follows: 
-```
-.
-├── saved_model
-│   ├── TransZeroPP_CUB_CZSL.pth
-│   ├── TransZeroPP_CUB_GZSL.pth
-│   ├── TransZeroPP_SUN_CZSL.pth
-│   ├── TransZeroPP_SUN_GZSL.pth
-│   ├── TransZeroPP_AWA2_CZSL.pth
-│   └── TransZeroPP_AWA2_GZSL.pth
-├── data
-│   ├── CUB/
-│   ├── SUN/
-│   └── AWA2/
-└── ···
-```
-
-## Requirements
-The code implementation of **TransZero++** mainly based on [PyTorch](https://pytorch.org/). All of our experiments run and test in Python 3.8.8. To install all required dependencies:
+## Running Environment
+The implementation of **TransZero++** is mainly based on Python 3.8.8 and [PyTorch](https://pytorch.org/) 1.8.0. To install all required dependencies:
 ```
 $ pip install -r requirements.txt
 ```
-## Runing
-Runing following commands and testing **TransZero++** on different dataset:
 
-CUB Dataset: 
+We use [Weights & Biases](https://wandb.ai/site) (W&B) to keep track and organize the results of experiments. You may need to follow the [online documentation](https://docs.wandb.ai/quickstart) of W&B to quickstart. 
+
+
+## Download Dataset 
+
+We trained the model on three popular ZSL benchmarks: [CUB](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html), [SUN](http://cs.brown.edu/~gmpatter/sunattributes.html) and [AWA2](http://cvml.ist.ac.at/AwA2/) following the data split of [xlsa17](http://datasets.d2.mpi-inf.mpg.de/xian/xlsa17.zip). In order to train the **TransZero++**, you should firstly download these datasets as well as the xlsa17. Then decompress and organize them as follows: 
 ```
-$ python test.py --config config/CUB_CZSL.json      # CZSL Setting
-$ python test.py --config config/CUB_GZSL.json      # GZSL Setting
+.
+├── data
+│   ├── CUB/CUB_200_2011/...
+│   ├── SUN/images/...
+│   ├── AWA2/Animals_with_Attributes2/...
+│   └── xlsa17/data/...
+└── ···
 ```
-SUN Dataset:
+
+
+## Visual Features Preprocessing
+
+In this step, you should run the following commands to extract the visual features of three datasets:
+
 ```
-$ python test.py --config config/SUN_CZSL.json      # CZSL Setting
-$ python test.py --config config/SUN_GZSL.json      # GZSL Setting
+$ python preprocessing.py --dataset CUB --compression --device cuda:0
+$ python preprocessing.py --dataset SUN --compression --device cuda:0
+$ python preprocessing.py --dataset AWA2 --compression --device cuda:0
 ```
-AWA2 Dataset: 
+
+## Training TransZero++ from Scratch
+In `./wandb_config`, we provide our parameters setting of conventional ZSL (CZSL) and generalized ZSL (GZSL) tasks for CUB, SUN, and AWA2. Please run the following commands to train the **TransZero++** from scratch:
+
 ```
-$ python test.py --config config/AWA2_CZSL.json     # CZSL Setting
-$ python test.py --config config/AWA2_GZSL.json     # GZSL Setting
+$ python train_cub.py   # CUB
+$ python train_sun.py   # SUN
+$ python train_awa2.py  # AWA2
 ```
+**Note**: Please load the corresponding setting when aiming at the CZSL task.
+
+
 
 ## Results
-Results of our released models using various evaluation protocols on three datasets, both in the conventional ZSL (CZSL) and generalized ZSL (GZSL) settings.
+
+We also provide trained models ([Google Drive](https://drive.google.com/drive/folders/1rNHCglaSD_Q5se1rs5qIh6QNtMDCZokc?usp=sharing)) on CUB/SUN/AWA2. You can download these `.pth` files and validate the results in our paper. Please refer to the [here](https://github.com/shiming-chen/TransZero/tree/test) for testing codes and usage.
+Following table shows the results of our released models using various evaluation protocols on three datasets, both in the CZSL and GZSL settings:
 
 | Dataset | Acc(CZSL) | U(GZSL) | S(GZSL) | H(GZSL) |
 | :-----: | :-----: | :-----: | :-----: | :-----: |
@@ -57,7 +58,7 @@ Results of our released models using various evaluation protocols on three datas
 | SUN | 67.6 | 48.6 | 37.8 | 42.5 |
 | AWA2 | 72.6 | 64.6 | 82.7 | 72.5 |
 
-**Note**: All of above results are run on a server with an AMD Ryzen 7 5800X CPU and a NVIDIA RTX A6000 GPU.
+**Note**:  The training of our models and all of the above results are run on a server with an AMD Ryzen 7 5800X CPU, 128GB memory, and an NVIDIA RTX A6000 GPU (48GB).
 
 ## Citation
 If this work is helpful for you, please cite our paper.
@@ -75,6 +76,7 @@ If this work is helpful for you, please cite our paper.
 Parts of our codes based on:
 * [hbdat/cvpr20_DAZLE](https://github.com/hbdat/cvpr20_DAZLE)
 * [zhangxuying1004/RSTNet](https://github.com/zhangxuying1004/RSTNet)
+* [shiming-chen/TransZero](https://github.com/shiming-chen/TransZero)
 
 ## Contact
 If you have any questions about codes, please don't hesitate to contact us by gchenshiming@gmail.com or hoongzm@gmail.com.

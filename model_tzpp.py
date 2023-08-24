@@ -2,22 +2,48 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-import torchvision.models as models
 
 
 class TransZeroPP(nn.Module):
-    def __init__(self, config):
+    def __init__(self, config, att, init_w2v_att, seenclass, unseenclass,
+                 is_bias=True, bias=1, is_conservative=True):
         super(TransZeroPP, self).__init__()
         self.config = config
         self.dim_f = config.dim_f
         self.dim_v = config.dim_v
         self.nclass = config.num_class
-
-        # bakcbone
-        resnet101 = models.resnet101(pretrained=True)
-        self.resnet101 = nn.Sequential(*list(resnet101.children())[:-2])
-
-        # AVT
+        self.seenclass = seenclass
+        self.unseenclass = unseenclass
+        self.is_bias = is_bias
+        self.is_conservative = is_conservative
+        # class-level semantic vectors
+        self.att = nn.Parameter(F.normalize(att), requires_grad=False)
+        # GloVe features for attributes
+        self.V = nn.Parameter(F.normalize(init_w2v_att), requires_grad=True)
+        # self-calibration
+        self.bias = nn.Parameter(torch.tensor(bias), requires_grad=False)
+        mask_bias = np.ones((1, self.nclass))
+        mask_bias[:, self.seenclass.cpu().numpy()] *= -1
+        self.mask_bias = nn.Parameter(torch.tensor(
+            mask_bias, dtype=torch.float), requires_grad=False)
+        # mapping
+        # s2v
+        self.W_1_s2v = nn.Parameter(nn.init.normal_(torch.empty(
+            self.dim_v, config.tf_common_dim)), requires_grad=True)
+        self.W_3_s2v = nn.Parameter(nn.init.zeros_(torch.empty(
+            self.dim_v, config.tf_common_dim)), requires_grad=True)
+        # v2s
+        if config.tf_v2s_init == 'zeros_':
+            self.W_1_v2s = nn.Parameter(nn.init.zeros_(torch.empty(
+                config.tf_common_dim, config.tf_common_dim)), requires_grad=True)
+        elif config.tf_v2s_init == 'normal_':
+            self.W_1_v2s = nn.Parameter(nn.init.normal_(torch.empty(
+                config.tf_common_dim, config.tf_common_dim)), requires_grad=True)
+        self.W_3_v2s = nn.Parameter(nn.init.zeros_(torch.empty(
+            self.dim_f, config.tf_common_dim)), requires_grad=True)
+        self.W_4_v2s = nn.Parameter(nn.init.normal_(torch.empty(
+            config.tf_common_dim, config.tf_common_dim)), requires_grad=True)
+        # transformer semantic -> visual
         self.transformer_s2v = TransformerPP(
             ec_layer=config.tf_ec_layer,
             dc_layer=config.tf_dc_layer,
@@ -25,8 +51,9 @@ class TransZeroPP(nn.Module):
             dim_feedforward=config.tf_dim_feedforward,
             dropout=config.tf_dropout,
             SAtt=config.tf_SAtt,
-            heads=config.tf_heads)
-        # VAT
+            heads=config.tf_heads,
+            aux_embed=config.tf_aux_embed)
+        # transformer visual -> semantic
         self.transformer_v2s = TransformerPP(
             ec_layer=config.tf_ec_layer,
             dc_layer=config.tf_dc_layer,
@@ -34,40 +61,30 @@ class TransZeroPP(nn.Module):
             dim_feedforward=config.tf_dim_feedforward,
             dropout=config.tf_dropout,
             SAtt=config.tf_SAtt,
-            heads=config.tf_heads)
-        
-        self.V = nn.Parameter(torch.empty(
-            config.num_attribute, self.dim_v), requires_grad=True)
-        self.att = nn.Parameter(torch.empty(
-            self.nclass, config.num_attribute), requires_grad=False)
-        self.bias = nn.Parameter(torch.tensor(1), requires_grad=False)
-        self.mask_bias = nn.Parameter(torch.empty(
-            1, self.nclass), requires_grad=False)
-        self.W_1_s2v = nn.Parameter(torch.empty(
-            self.dim_v, config.tf_common_dim), requires_grad=True)
-        self.W_3_s2v = nn.Parameter(torch.empty(
-            self.dim_v, config.tf_common_dim), requires_grad=True)
-        self.W_1_v2s = nn.Parameter(torch.empty(
-            config.tf_common_dim, config.tf_common_dim), requires_grad=True)
-        self.W_3_v2s = nn.Parameter(torch.empty(
-            self.dim_f, config.tf_common_dim), requires_grad=True)
-        self.W_4_v2s = nn.Parameter(torch.empty(
-            config.tf_common_dim, config.tf_common_dim), requires_grad=True)
+            heads=config.tf_heads,
+            aux_embed=config.tf_aux_embed)
+        # loss
+        self.log_softmax_func = nn.LogSoftmax(dim=1)
+        self.weight_ce = nn.Parameter(torch.eye(self.nclass), requires_grad=False)
 
-    def forward(self, imgs):
-        Fs = self.resnet101(imgs)
+    def forward(self, input, from_img=False):
+        Fs = self.resnet101(input) if from_img else input
+        # transformer-based visual-to-semantic embedding
         embed_s2v, embed_v2s = self.forward_feature_transformer(Fs)
-        package = {'embed_s2v': self.forward_attribute(embed_s2v),
-                   'embed_v2s': self.forward_attribute(embed_v2s)}
-        package['embed'] = self.config.weight_s2v * package['embed_s2v'] + \
-            (1 - self.config.weight_s2v) * package['embed_v2s']
-        return package
-
-    def forward_attribute(self, embed):
-        embed = torch.einsum('ki,bi->bk', self.att, embed)
-        self.vec_bias = self.mask_bias*self.bias
-        embed = embed + self.vec_bias
-        return embed
+        # classification
+        package_s2v = {}
+        package_s2v['pred'] = self.forward_attribute(embed_s2v)
+        package_s2v['embed'] = embed_s2v
+        package_v2s = {}
+        package_v2s['pred'] = self.forward_attribute(embed_v2s)
+        package_v2s['embed'] = embed_v2s
+        out_package = {}
+        out_package['package_s2v'] = package_s2v
+        out_package['package_v2s'] = package_v2s
+        out_package['pred'] = self.config.weight_s2v * package_s2v['pred'] + \
+            (1 - self.config.weight_s2v) * package_v2s['pred']
+        out_package['S_pp'] = out_package['pred']
+        return out_package
 
     def forward_feature_transformer(self, Fs):
         if len(Fs.shape) == 4:
@@ -92,19 +109,84 @@ class TransZeroPP(nn.Module):
         S_p_v2s = torch.einsum('rbf,fc,brc->br', memory_v2s, self.W_1_v2s, F_p_v2s)
         E_v2s = torch.einsum('brc,cc,bic->bir', emb_vis_v2s, self.W_4_v2s, emb_att_v2s)
         embed_v2s = torch.einsum('bir,br->bi', E_v2s, S_p_v2s)
-
         return embed_s2v, embed_v2s
-        
+
+    def forward_attribute(self, embed):
+        embed = torch.einsum('ki,bi->bk', self.att, embed)
+        self.vec_bias = self.mask_bias*self.bias
+        embed = embed + self.vec_bias
+        return embed
+
+    def compute_loss_Self_Calibrate(self, in_package):
+        S_pp = in_package['pred']
+        Prob_all = F.softmax(S_pp, dim=-1)
+        Prob_unseen = Prob_all[:, self.unseenclass]
+        assert Prob_unseen.size(1) == len(self.unseenclass)
+        mass_unseen = torch.sum(Prob_unseen, dim=1)
+        loss_pmp = -torch.log(torch.mean(mass_unseen))
+        return loss_pmp
+
+    def compute_aug_cross_entropy(self, in_package):
+        Labels = in_package['batch_label']
+        S_pp = in_package['pred']
+
+        if self.is_bias:
+            S_pp = S_pp - self.vec_bias
+
+        if not self.is_conservative:
+            S_pp = S_pp[:, self.seenclass]
+            Labels = Labels[:, self.seenclass]
+            assert S_pp.size(1) == len(self.seenclass)
+
+        Prob = self.log_softmax_func(S_pp)
+
+        loss = -torch.einsum('bk,bk->b', Prob, Labels)
+        loss = torch.mean(loss)
+        return loss
+
+    def compute_reg_loss(self, in_package):
+        tgt = torch.matmul(in_package['batch_label'], self.att)
+        embed = in_package['embed']
+        loss_reg = F.mse_loss(embed, tgt, reduction='mean')
+        return loss_reg
+
+    def compute_loss(self, in_package):
+        if len(in_package['batch_label'].size()) == 1:
+            in_package['batch_label'] = self.weight_ce[in_package['batch_label']]
+
+        loss_CE = self.compute_aug_cross_entropy(in_package)
+        loss_cal = self.compute_loss_Self_Calibrate(in_package)
+        loss_reg = self.compute_reg_loss(in_package)
+
+        loss = loss_CE + self.config.lambda_ * \
+            loss_cal + self.config.lambda_reg * loss_reg
+        out_package = {'loss': loss, 'loss_CE': loss_CE,
+                       'loss_cal': loss_cal, 'loss_reg': loss_reg}
+        return out_package
+    
+    def WeightedL2(self, pred, gt):
+        loss = F.mse_loss(pred, gt, reduction='mean')
+        return loss
+    
+    def compute_contrastive_loss(self, in_package1, in_package2):
+        reg_func = self.WeightedL2
+        loss_att = reg_func(in_package1['embed'], in_package2['embed'])
+        loss_cls = reg_func(in_package1['pred'], in_package2['pred'])
+        return loss_att, loss_cls
+
 
 class Transformer(nn.Module):
     def __init__(self, ec_layer=1, dc_layer=1, dim_com=300,
                  dim_feedforward=2048, dropout=0.1, heads=1,
-                 in_dim_cv=2048, in_dim_attr=300, SAtt=True):
+                 in_dim_cv=2048, in_dim_attr=300, SAtt=True,
+                 aux_embed=True):
         super(Transformer, self).__init__()
-        # # input embedding
+        # input embedding
         self.embed_cv = nn.Sequential(nn.Linear(in_dim_cv, dim_com))
-        self.embed_cv_aux = nn.Sequential(nn.Linear(in_dim_cv, dim_com))
+        if aux_embed:
+            self.embed_cv_aux = nn.Sequential(nn.Linear(in_dim_cv, dim_com))
         self.embed_attr = nn.Sequential(nn.Linear(in_dim_attr, dim_com))
+        # transformer encoder
         self.transformer_encoder = MultiLevelEncoder_woPad(N=ec_layer,
                                                            d_model=dim_com,
                                                            h=1,
@@ -112,6 +194,7 @@ class Transformer(nn.Module):
                                                            d_v=dim_com,
                                                            d_ff=dim_feedforward,
                                                            dropout=dropout)
+        # transformer decoder
         decoder_layer = TransformerDecoderLayer(d_model=dim_com,
                                                 nhead=heads,
                                                 dim_feedforward=dim_feedforward,
@@ -121,22 +204,26 @@ class Transformer(nn.Module):
             decoder_layer, num_layers=dc_layer)
 
     def forward(self, f_cv, f_attr):
+        # linearly map to common dim
         h_cv = self.embed_cv(f_cv.permute(0, 2, 1))
         h_attr = self.embed_attr(f_attr)
         h_attr_batch = h_attr.unsqueeze(0).repeat(f_cv.shape[0], 1, 1)
+        # visual encoder
         memory = self.transformer_encoder(h_cv).permute(1, 0, 2)
+        # attribute-visual decoder
         out = self.transformer_decoder(h_attr_batch.permute(1, 0, 2), memory)
         return out.permute(1, 0, 2)
-
+    
 
 class TransformerPP(Transformer):
     def __init__(self, ec_layer=1, dc_layer=1, dim_com=300,
                  dim_feedforward=2048, dropout=0.1, heads=1,
-                 in_dim_cv=2048, in_dim_attr=300, SAtt=True):
+                 in_dim_cv=2048, in_dim_attr=300, SAtt=True, 
+                 aux_embed=True):
 
         super(TransformerPP, self).__init__(
             ec_layer, dc_layer, dim_com, dim_feedforward, dropout,
-            heads, in_dim_cv, in_dim_attr, SAtt)
+            heads, in_dim_cv, in_dim_attr, SAtt, aux_embed)
 
     def forward_encoder(self, f_cv, f_attr, pre_embed=True, is_enc=True):
         if pre_embed:
@@ -158,11 +245,13 @@ class TransformerPP(Transformer):
 
 
 class EncoderLayer(nn.Module):
-    def __init__(self, d_model=512, d_k=64, d_v=64, h=8, d_ff=2048, dropout=.1, identity_map_reordering=False,
+    def __init__(self, d_model=512, d_k=64, d_v=64, h=8, d_ff=2048,
+                 dropout=.1, identity_map_reordering=False,
                  attention_module=None, attention_module_kwargs=None):
         super(EncoderLayer, self).__init__()
         self.identity_map_reordering = identity_map_reordering
-        self.mhatt = MultiHeadGeometryAttention(d_model, d_k, d_v, h, dropout, identity_map_reordering=identity_map_reordering,
+        self.mhatt = MultiHeadGeometryAttention(d_model, d_k, d_v, h, dropout,
+                                                identity_map_reordering=identity_map_reordering,
                                                 attention_module=attention_module,
                                                 attention_module_kwargs=attention_module_kwargs)
         self.dropout = nn.Dropout(dropout)
@@ -170,7 +259,8 @@ class EncoderLayer(nn.Module):
         self.pwff = PositionWiseFeedForward(
             d_model, d_ff, dropout, identity_map_reordering=identity_map_reordering)
 
-    def forward(self, queries, keys, values, relative_geometry_weights, attention_mask=None, attention_weights=None, pos=None):
+    def forward(self, queries, keys, values, relative_geometry_weights,
+                attention_mask=None, attention_weights=None, pos=None):
         q, k = (queries + pos, keys +
                 pos) if pos is not None else (queries, keys)
         att = self.mhatt(q, k, values, relative_geometry_weights,
@@ -181,8 +271,9 @@ class EncoderLayer(nn.Module):
 
 
 class MultiLevelEncoder_woPad(nn.Module):
-    def __init__(self, N, d_model=512, d_k=64, d_v=64, h=8, d_ff=2048, dropout=.1,
-                 identity_map_reordering=False, attention_module=None, attention_module_kwargs=None):
+    def __init__(self, N, d_model=512, d_k=64, d_v=64, h=8, d_ff=2048,
+                 dropout=.1, identity_map_reordering=False,
+                 attention_module=None, attention_module_kwargs=None):
         super(MultiLevelEncoder_woPad, self).__init__()
         self.d_model = d_model
         self.dropout = dropout
@@ -215,7 +306,8 @@ class MultiLevelEncoder_woPad(nn.Module):
 
 
 class TransformerDecoderLayer(nn.TransformerDecoderLayer):
-    def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1, activation="relu", SAtt=True):
+    def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1,
+                 activation="relu", SAtt=True):
         super(TransformerDecoderLayer, self).__init__(d_model, nhead,
                                                       dim_feedforward=dim_feedforward,
                                                       dropout=dropout,
@@ -258,7 +350,8 @@ def get_grids_pos(batch_size, seq_len, grid_size=(7, 7)):
     return rpx_min, rpy_min, rpx_max, rpy_max
 
 
-def BoxRelationalEmbedding(f_g, dim_g=64, wave_len=1000, trignometric_embedding=True, grid_size=(7, 7)):
+def BoxRelationalEmbedding(f_g, dim_g=64, wave_len=1000, trignometric_embedding=True,
+                           grid_size=(7, 7)):
     batch_size, seq_len = f_g.size(0), f_g.size(1)
     x_min, y_min, x_max, y_max = get_grids_pos(batch_size, seq_len, grid_size)
     cx = (x_min + x_max) * 0.5
@@ -322,7 +415,8 @@ class ScaledDotProductGeometryAttention(nn.Module):
         nn.init.constant_(self.fc_v.bias, 0)
         nn.init.constant_(self.fc_o.bias, 0)
 
-    def forward(self, queries, keys, values, box_relation_embed_matrix, attention_mask=None, attention_weights=None):
+    def forward(self, queries, keys, values, box_relation_embed_matrix,
+                attention_mask=None, attention_weights=None):
         b_s, nq = queries.shape[:2]
         nk = keys.shape[1]
         q = self.fc_q(queries).view(b_s, nq, self.h,
@@ -347,8 +441,9 @@ class ScaledDotProductGeometryAttention(nn.Module):
 
 
 class MultiHeadGeometryAttention(nn.Module):
-    def __init__(self, d_model, d_k, d_v, h, dropout=.1, identity_map_reordering=False, can_be_stateful=False,
-                 attention_module=None, attention_module_kwargs=None, comment=None):
+    def __init__(self, d_model, d_k, d_v, h, dropout=.1, identity_map_reordering=False,
+                 can_be_stateful=False, attention_module=None,
+                 attention_module_kwargs=None, comment=None):
         super(MultiHeadGeometryAttention, self).__init__()
         self.identity_map_reordering = identity_map_reordering
         self.attention = ScaledDotProductGeometryAttention(
@@ -360,7 +455,8 @@ class MultiHeadGeometryAttention(nn.Module):
             self.register_state('running_keys', torch.zeros((0, d_model)))
             self.register_state('running_values', torch.zeros((0, d_model)))
 
-    def forward(self, queries, keys, values, relative_geometry_weights, attention_mask=None, attention_weights=None):
+    def forward(self, queries, keys, values, relative_geometry_weights,
+                attention_mask=None, attention_weights=None):
         if self.can_be_stateful and self._is_stateful:
             self.running_keys = torch.cat([self.running_keys, keys], 1)
             keys = self.running_keys
@@ -370,12 +466,12 @@ class MultiHeadGeometryAttention(nn.Module):
             q_norm = self.layer_norm(queries)
             k_norm = self.layer_norm(keys)
             v_norm = self.layer_norm(values)
-            out = self.attention(
-                q_norm, k_norm, v_norm, relative_geometry_weights, attention_mask, attention_weights)
+            out = self.attention(q_norm, k_norm, v_norm, relative_geometry_weights,
+                                 attention_mask, attention_weights)
             out = queries + self.dropout(torch.relu(out))
         else:
-            out = self.attention(
-                queries, keys, values, relative_geometry_weights, attention_mask, attention_weights)
+            out = self.attention(queries, keys, values, relative_geometry_weights,
+                                 attention_mask, attention_weights)
             out = self.dropout(out)
             out = self.layer_norm(queries + out)
         return out
