@@ -42,7 +42,6 @@ tf_dropout:
   value: 0.3
 tf_v2s_init:
   value: normal_
-  # value: zeros_
 weight_s2v:
   value: 0.2
 lambda_:

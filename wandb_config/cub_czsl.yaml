@@ -21,7 +21,7 @@ epochs:
 use_unzip:
   value: True
 random_seed:
-  value: 4590
+  value: 3423
 normalize_V:
   value: False
 tf_SAtt:
